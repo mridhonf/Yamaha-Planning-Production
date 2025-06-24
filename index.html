@@ -243,8 +243,22 @@
     }
 
 function exportToPDF() {
-    const container = document.getElementById("report");
-    html2canvas(container, { scale: 2, windowWidth: document.body.scrollWidth }).then(canvas => {
+    const section = document.createElement("div");
+    const content = document.querySelector("#tabelInvoice").cloneNode(true);
+    const grafik = document.querySelector("#grafik").cloneNode(true);
+    const signature = document.querySelector(".signature").cloneNode(true);
+
+    section.style.background = "white";
+    section.style.padding = "20px";
+    section.style.fontFamily = "Arial";
+
+    section.appendChild(content);
+    section.appendChild(grafik);
+    section.appendChild(signature);
+
+    document.body.appendChild(section);
+
+    html2canvas(section, { scale: 2 }).then(canvas => {
         const imgData = canvas.toDataURL("image/png");
         const { jsPDF } = window.jspdf;
         const pdf = new jsPDF("p", "mm", "a4");
@@ -268,6 +282,7 @@ function exportToPDF() {
         }
 
         pdf.save("invoice_prediksi_motor.pdf");
+        document.body.removeChild(section);
     });
 }
 </script>
