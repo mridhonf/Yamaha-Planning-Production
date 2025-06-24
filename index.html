@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Model Proyeksi Permintaan Motor</title>
-    <link rel="icon" href="https://www.bing.com/images/search?view=detailV2&ccid=WiIj2irD&id=991426DE04CA0946CD7C6387A1FA14031CB19212&thid=OIP.WiIj2irDRL70PdB34NZi_AHaHa&mediaurl=https%3A%2F%2Fstatic.vecteezy.com%2Fsystem%2Fresources%2Fpreviews%2F020%2F336%2F399%2Foriginal%2Fyamaha-logo-yamaha-icon-free-free-vector.jpg&exph=1920&expw=1920&q=yamaha+logo&simid=608030481067765859&form=IRPRST&ck=06881EF34D237601F546DFAFD0CE743B&selectedindex=4&itb=0&ajaxhist=0&ajaxserp=0&vt=0&sim=11">
+    <link rel="icon" href="yamaha-logo.jpg" type="image/jpeg">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
@@ -67,6 +67,17 @@
         .logo img {
             height: 100px;
         }
+        .footer {
+            text-align: center;
+            margin-top: 40px;
+            font-size: 14px;
+            color: #555;
+        }
+        .signature {
+            margin-top: 60px;
+            text-align: right;
+            font-style: italic;
+        }
     </style>
 </head>
 <body>
@@ -74,8 +85,8 @@
         <div class="logo">
             <img src="yamaha-logo.jpg" alt="Logo Yamaha">
         </div>
-        <h1>Model Proyeksi Permintaan Motor</h1>
-        <p>Memprediksi permintaan motor di masa depan menggunakan regresi linear sederhana.</p>
+        <h1>INVOICE - Prediksi Permintaan Motor</h1>
+        <p><strong>Perusahaan:</strong> Yamaha Indonesia Motor Manufacturing</p>
 
         <label>Masukan Harga 1 Unit Motor:</label>
         <input type="number" id="harga" value="0">
@@ -90,15 +101,28 @@
         <input type="number" id="tahun_pred" value="2025">
 
         <button onclick="hitungRegresi()">Hitung Prediksi</button>
-        <button onclick="exportToPDF()">Export ke PDF</button>
+        <button onclick="exportToPDF()">Export Invoice ke PDF</button>
 
         <p id="hasilPrediksi"></p>
         <p id="totalBiaya"></p>
 
         <canvas id="grafik"></canvas>
+
+        <div class="signature">
+            <p>Hormat Kami,</p>
+            <p><strong>M Ridho NF</strong><br>Direktur Utama</p>
+        </div>
+
+        <div class="footer">
+            Dicetak secara otomatis oleh sistem pada <span id="tanggalSekarang"></span>
+        </div>
     </div>
 
     <script>
+        document.getElementById("tanggalSekarang").innerText = new Date().toLocaleDateString("id-ID", {
+            year: 'numeric', month: 'long', day: 'numeric'
+        });
+
         let chartInstance;
         function hitungRegresi() {
             const harga = parseFloat(document.getElementById("harga").value);
@@ -192,7 +216,7 @@
                 const width = pdf.internal.pageSize.getWidth();
                 const height = (canvas.height * width) / canvas.width;
                 pdf.addImage(imgData, "PNG", 0, 0, width, height);
-                pdf.save("laporan_prediksi_motor.pdf");
+                pdf.save("invoice_prediksi_motor.pdf");
             });
         }
     </script>
