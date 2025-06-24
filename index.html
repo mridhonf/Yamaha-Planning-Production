@@ -156,134 +156,158 @@
     });
 
     let chartInstance;
-    function hitungRegresi() {
-        const harga = parseFloat(document.getElementById("harga").value);
-        const tahunInput = document.getElementById("years").value.split(',').map(Number);
-        const salesInput = document.getElementById("sales").value.split(',').map(Number);
-        const tahunPred = parseInt(document.getElementById("tahun_pred").value);
+function hitungRegresi() {
+    const harga = parseFloat(document.getElementById("harga").value);
+    const tahunInput = document.getElementById("years").value.split(',').map(Number);
+    const salesInput = document.getElementById("sales").value.split(',').map(Number);
+    const tahunPred = parseInt(document.getElementById("tahun_pred").value);
 
-        if (tahunInput.length !== salesInput.length) {
-            alert("Jumlah tahun dan data penjualan harus sama.");
-            return;
-        }
+    if (tahunInput.length !== salesInput.length) {
+        alert("Jumlah tahun dan data penjualan harus sama.");
+        return;
+    }
 
-        const n = tahunInput.length;
-        const sumX = tahunInput.reduce((a, b) => a + b, 0);
-        const sumY = salesInput.reduce((a, b) => a + b, 0);
-        const sumXY = tahunInput.reduce((sum, xi, i) => sum + xi * salesInput[i], 0);
-        const sumX2 = tahunInput.reduce((sum, xi) => sum + xi * xi, 0);
+    const n = tahunInput.length;
+    const sumX = tahunInput.reduce((a, b) => a + b, 0);
+    const sumY = salesInput.reduce((a, b) => a + b, 0);
+    const sumXY = tahunInput.reduce((sum, xi, i) => sum + xi * salesInput[i], 0);
+    const sumX2 = tahunInput.reduce((sum, xi) => sum + xi * xi, 0);
 
-        const b = (n * sumXY - sumX * sumY) / (n * sumX2 - sumX * sumX);
-        const a = (sumY - b * sumX) / n;
+    const b = (n * sumXY - sumX * sumY) / (n * sumX2 - sumX * sumX);
+    const a = (sumY - b * sumX) / n;
 
-        const prediksi = a + b * tahunPred;
-        const biaya = harga * prediksi;
+    const prediksi = a + b * tahunPred;
+    const biaya = harga * prediksi;
 
-        document.getElementById("tahunPredTd").innerText = tahunPred;
-        document.getElementById("jumlahPrediksiTd").innerText = prediksi.toFixed(0);
-        document.getElementById("hargaTd").innerText = `Rp ${harga.toLocaleString()}`;
-        document.getElementById("totalBiayaTd").innerText = `Rp ${biaya.toFixed(0).toLocaleString()}`;
-        document.getElementById("tabelInvoice").style.display = 'table';
+    document.getElementById("tahunPredTd").innerText = tahunPred;
+    document.getElementById("jumlahPrediksiTd").innerText = prediksi.toFixed(0);
+    document.getElementById("hargaTd").innerText = `Rp ${harga.toLocaleString()}`;
+    document.getElementById("totalBiayaTd").innerText = `Rp ${biaya.toFixed(0).toLocaleString()}`;
+    document.getElementById("tabelInvoice").style.display = 'table';
 
-        const ctx = document.getElementById('grafik').getContext('2d');
-        const labels = [...tahunInput, tahunPred];
-        const actualData = [...salesInput];
-        const regressionLine = tahunInput.concat(tahunPred).map(x => a + b * x);
+    const grafik = document.getElementById('grafik');
+    const ctx = grafik.getContext('2d');
+    const labels = [...tahunInput, tahunPred];
+    const actualData = [...salesInput];
+    const regressionLine = tahunInput.concat(tahunPred).map(x => a + b * x);
 
-        if (chartInstance) chartInstance.destroy();
+    if (window.chartInstance) window.chartInstance.destroy();
 
-        chartInstance = new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels: labels,
-                datasets: [
-                    {
-                        label: 'Data Aktual',
-                        data: actualData,
-                        borderColor: 'blue',
-                        backgroundColor: 'blue',
-                        fill: false
-                    },
-                    {
-                        label: 'Regresi Linear',
-                        data: regressionLine,
-                        borderColor: 'red',
-                        borderDash: [5, 5],
-                        fill: false
-                    }
-                ]
+    window.chartInstance = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [
+                {
+                    label: 'Data Aktual',
+                    data: actualData,
+                    borderColor: 'blue',
+                    backgroundColor: 'blue',
+                    fill: false
+                },
+                {
+                    label: 'Regresi Linear',
+                    data: regressionLine,
+                    borderColor: 'red',
+                    borderDash: [5, 5],
+                    fill: false
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    position: 'top',
+                },
+                title: {
+                    display: true,
+                    text: 'Grafik Prediksi Permintaan Motor'
+                }
             },
-            options: {
-                responsive: true,
-                plugins: {
-                    legend: {
-                        position: 'top',
-                    },
+            scales: {
+                x: {
                     title: {
                         display: true,
-                        text: 'Grafik Prediksi Permintaan Motor'
+                        text: 'Tahun'
                     }
                 },
-                scales: {
-                    x: {
-                        title: {
-                            display: true,
-                            text: 'Tahun'
-                        }
-                    },
-                    y: {
-                        title: {
-                            display: true,
-                            text: 'Jumlah Terjual (unit)'
-                        }
+                y: {
+                    title: {
+                        display: true,
+                        text: 'Jumlah Terjual (unit)'
                     }
                 }
             }
-        });
-    }
-
-function exportToPDF() {
-    const section = document.createElement("div");
-    const content = document.querySelector("#tabelInvoice").cloneNode(true);
-    const grafik = document.querySelector("#grafik").cloneNode(true);
-    const signature = document.querySelector(".signature").cloneNode(true);
-
-    section.style.background = "white";
-    section.style.padding = "20px";
-    section.style.fontFamily = "Arial";
-
-    section.appendChild(content);
-    section.appendChild(grafik);
-    section.appendChild(signature);
-
-    document.body.appendChild(section);
-
-    html2canvas(section, { scale: 2 }).then(canvas => {
-        const imgData = canvas.toDataURL("image/png");
-        const { jsPDF } = window.jspdf;
-        const pdf = new jsPDF("p", "mm", "a4");
-
-        const pageWidth = pdf.internal.pageSize.getWidth();
-        const pageHeight = pdf.internal.pageSize.getHeight();
-        const imgWidth = pageWidth;
-        const imgHeight = (canvas.height * imgWidth) / canvas.width;
-
-        let heightLeft = imgHeight;
-        let position = 0;
-
-        pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-        heightLeft -= pageHeight;
-
-        while (heightLeft > 0) {
-            position = heightLeft - imgHeight;
-            pdf.addPage();
-            pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-            heightLeft -= pageHeight;
         }
-
-        pdf.save("invoice_prediksi_motor.pdf");
-        document.body.removeChild(section);
     });
+
+    const newWin = window.open("", "PrintWindow", "width=900,height=700");
+    newWin.document.write(`
+        <html><head><title>Hasil Prediksi</title>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+        <style>
+            body { font-family: Arial; padding: 20px; }
+            table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+            table, th, td { border: 1px solid #ccc; }
+            th, td { padding: 10px; text-align: left; }
+            th { background-color: #f2f2f2; }
+            .grafik-wrapper { width: 100%; height: 400px; }
+            button { padding: 10px 20px; background: #3498db; color: #fff; border: none; cursor: pointer; }
+        </style>
+        </head><body>
+        <h2>Hasil Prediksi Permintaan Motor</h2>
+        <table>
+            <tr><th>Deskripsi</th><th>Nilai</th></tr>
+            <tr><td>Tahun Prediksi</td><td>${tahunPred}</td></tr>
+            <tr><td>Jumlah Permintaan</td><td>${prediksi.toFixed(0)}</td></tr>
+            <tr><td>Harga per Unit (Rp)</td><td>Rp ${harga.toLocaleString()}</td></tr>
+            <tr><td>Total Biaya (Rp)</td><td>Rp ${biaya.toFixed(0).toLocaleString()}</td></tr>
+        </table>
+        <canvas id="canvasExport" width="800" height="400"></canvas>
+        <br><button onclick="exportPdf()">Export PDF</button>
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+        <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+        <script>
+            const ctx2 = document.getElementById('canvasExport').getContext('2d');
+            new Chart(ctx2, {
+                type: 'line',
+                data: {
+                    labels: ${JSON.stringify(labels)},
+                    datasets: [
+                        {
+                            label: 'Data Aktual',
+                            data: ${JSON.stringify(actualData)},
+                            borderColor: 'blue',
+                            fill: false
+                        },
+                        {
+                            label: 'Regresi Linear',
+                            data: ${JSON.stringify(regressionLine)},
+                            borderColor: 'red',
+                            borderDash: [5, 5],
+                            fill: false
+                        }
+                    ]
+                }
+            });
+
+            function exportPdf() {
+                html2canvas(document.body).then(canvas => {
+                    const { jsPDF } = window.jspdf;
+                    const pdf = new jsPDF("p", "mm", "a4");
+                    const imgData = canvas.toDataURL("image/png");
+                    const width = pdf.internal.pageSize.getWidth();
+                    const height = (canvas.height * width) / canvas.width;
+                    pdf.addImage(imgData, 'PNG', 0, 0, width, height);
+                    pdf.save("hasil_prediksi_motor.pdf");
+                });
+            }
+        </script>
+        </body></html>
+    `);
+    newWin.document.close();
 }
 </script>
 </body>
