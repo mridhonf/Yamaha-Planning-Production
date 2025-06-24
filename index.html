@@ -84,21 +84,17 @@
   <label for="tahun_pred">Tahun Prediksi:</label>
   <input id="tahun_pred" type="number" value="2025" />
 
-  <button onclick="hitungRegresi()"><i class="fas fa-chart-line"></i> Hitung Prediksi</button>
+  <br>
+  <button onclick="bukaHasil()">Lihat Hasil dan Export PDF</button>
 
-  <table id="tabelInvoice">
-    <tr><th>Deskripsi</th><th>Nilai</th></tr>
-    <tr><td>Tahun Prediksi</td><td id="tahunPredTd"></td></tr>
-    <tr><td>Jumlah Permintaan</td><td id="jumlahPrediksiTd"></td></tr>
-    <tr><td>Harga per Unit (Rp)</td><td id="hargaTd"></td></tr>
-    <tr><td>Total Biaya (Rp)</td><td id="totalBiayaTd"></td></tr>
-  </table>
-
-  <canvas id="grafik" width="600" height="300"></canvas>
-
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script>
-    // ... (hitungRegresi function tetap sama, tidak diubah)
+    function bukaHasil() {
+      localStorage.setItem("harga", document.getElementById("harga").value);
+      localStorage.setItem("years", document.getElementById("years").value);
+      localStorage.setItem("sales", document.getElementById("sales").value);
+      localStorage.setItem("tahun_pred", document.getElementById("tahun_pred").value);
+      window.open("hasil.html", "_blank");
+    }
   </script>
 </body>
 </html>
