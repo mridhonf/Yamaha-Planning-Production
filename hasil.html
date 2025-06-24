@@ -1,0 +1,88 @@
+
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <title>Hasil Prediksi</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; }
+    table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+    table, th, td { border: 1px solid #ccc; }
+    th, td { padding: 10px; text-align: left; }
+    th { background-color: #f0f0f0; }
+    canvas { max-width: 100%; height: auto; margin-bottom: 20px; }
+    button { padding: 10px 20px; background: #3498db; color: #fff; border: none; cursor: pointer; }
+  </style>
+</head>
+<body>
+
+<h2>Hasil Prediksi Permintaan Motor</h2>
+
+<table>
+  <tr><th>Deskripsi</th><th>Nilai</th></tr>
+  <tr><td>Tahun Prediksi</td><td id="tdTahunPred"></td></tr>
+  <tr><td>Jumlah Permintaan</td><td id="tdPrediksi"></td></tr>
+  <tr><td>Harga per Unit (Rp)</td><td id="tdHarga"></td></tr>
+  <tr><td>Total Biaya (Rp)</td><td id="tdTotal"></td></tr>
+</table>
+
+<canvas id="chart"></canvas>
+<button onclick="exportPdf()">Export PDF</button>
+
+<script>
+window.onload = function () {
+  const harga = parseFloat(localStorage.getItem("harga"));
+  const years = localStorage.getItem("years").split(',').map(Number);
+  const sales = localStorage.getItem("sales").split(',').map(Number);
+  const tahunPred = parseInt(localStorage.getItem("tahun_pred"));
+
+  const n = years.length;
+  const sumX = years.reduce((a, b) => a + b, 0);
+  const sumY = sales.reduce((a, b) => a + b, 0);
+  const sumXY = years.reduce((sum, xi, i) => sum + xi * sales[i], 0);
+  const sumX2 = years.reduce((sum, xi) => sum + xi * xi, 0);
+
+  const b = (n * sumXY - sumX * sumY) / (n * sumX2 - sumX * sumX);
+  const a = (sumY - b * sumX) / n;
+  const prediksi = a + b * tahunPred;
+  const total = prediksi * harga;
+
+  document.getElementById("tdTahunPred").innerText = tahunPred;
+  document.getElementById("tdPrediksi").innerText = Math.round(prediksi);
+  document.getElementById("tdHarga").innerText = "Rp " + harga.toLocaleString();
+  document.getElementById("tdTotal").innerText = "Rp " + total.toFixed(0).toLocaleString();
+
+  const ctx = document.getElementById('chart').getContext('2d');
+  const labels = [...years, tahunPred];
+  const regression = labels.map(x => a + b * x);
+
+  new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: labels,
+      datasets: [
+        { label: 'Data Aktual', data: sales, borderColor: 'blue', fill: false },
+        { label: 'Regresi Linear', data: regression, borderColor: 'red', borderDash: [5,5], fill: false }
+      ]
+    }
+  });
+};
+
+function exportPdf() {
+  html2canvas(document.body).then(canvas => {
+    const imgData = canvas.toDataURL('image/png');
+    const { jsPDF } = window.jspdf;
+    const pdf = new jsPDF();
+    const width = pdf.internal.pageSize.getWidth();
+    const height = (canvas.height * width) / canvas.width;
+    pdf.addImage(imgData, 'PNG', 0, 0, width, height);
+    pdf.save('hasil_prediksi_motor.pdf');
+  });
+}
+</script>
+
+</body>
+</html>
