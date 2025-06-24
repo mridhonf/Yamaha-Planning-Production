@@ -1,0 +1,42 @@
+
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <title>Prediksi Permintaan Motor</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body { font-family: Arial; padding: 20px; }
+    label { display: block; margin-top: 10px; }
+    input, button { padding: 8px; width: 300px; max-width: 100%; }
+    button { margin-top: 20px; background: #3498db; color: #fff; border: none; cursor: pointer; }
+  </style>
+</head>
+<body>
+  <h2>Prediksi Permintaan Motor dengan Regresi Linear</h2>
+  <label>Harga per Unit Motor (Rp):</label>
+  <input id="harga" type="number" />
+
+  <label>Tahun-tahun Historis (pisahkan dengan koma):</label>
+  <input id="years" value="2019,2020,2021,2022,2023" />
+
+  <label>Jumlah Terjual per Tahun (unit):</label>
+  <input id="sales" value="2000,2200,2500,2700,3000" />
+
+  <label>Tahun Prediksi:</label>
+  <input id="tahun_pred" value="2025" />
+
+  <br>
+  <button onclick="bukaHasil()">Lihat Hasil dan Export PDF</button>
+
+  <script>
+    function bukaHasil() {
+      localStorage.setItem("harga", document.getElementById("harga").value);
+      localStorage.setItem("years", document.getElementById("years").value);
+      localStorage.setItem("sales", document.getElementById("sales").value);
+      localStorage.setItem("tahun_pred", document.getElementById("tahun_pred").value);
+      window.open("hasil.html", "_blank");
+    }
+  </script>
+</body>
+</html>
