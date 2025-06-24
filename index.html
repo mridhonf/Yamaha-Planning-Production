@@ -1,3 +1,4 @@
+<!-- Full updated HTML with invoice in table format -->
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -50,13 +51,6 @@
         button:hover {
             background-color: #2980b9;
         }
-        p {
-            font-size: 16px;
-            color: #2c3e50;
-            background: #ecf0f1;
-            padding: 10px;
-            border-radius: 6px;
-        }
         canvas {
             margin-top: 30px;
         }
@@ -78,147 +72,188 @@
             text-align: right;
             font-style: italic;
         }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        table, th, td {
+            border: 1px solid #ccc;
+        }
+        th, td {
+            padding: 10px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
     </style>
 </head>
 <body>
-    <div class="container" id="report">
-        <div class="logo">
-            <img src="yamaha-logo.jpg" alt="Logo Yamaha">
-        </div>
-        <h1>Prediksi Permintaan Motor</h1>
-        <p><strong>Perusahaan:</strong> Yamaha Indonesia Motor Manufacturing</p>
+<div class="container" id="report">
+    <div class="logo">
+        <img src="yamaha-logo.jpg" alt="Logo Yamaha">
+    </div>
+    <h1>INVOICE - Prediksi Permintaan Motor</h1>
+    <p><strong>Perusahaan:</strong> Yamaha Indonesia Motor Manufacturing</p>
 
-        <label>Masukan Harga 1 Unit Motor:</label>
-        <input type="number" id="harga" value="0">
+    <label>Masukan Harga 1 Unit Motor:</label>
+    <input type="number" id="harga" value="0">
 
-        <label>Tahun-tahun (pisahkan dengan koma):</label>
-        <input type="text" id="years" value="2019,2020,2021,2022,2023">
+    <label>Tahun-tahun (pisahkan dengan koma):</label>
+    <input type="text" id="years" value="2019,2020,2021,2022,2023">
 
-        <label>Jumlah terjual per tahun (unit):</label>
-        <input type="text" id="sales" value="2000,2200,2500,2700,3000">
+    <label>Jumlah terjual per tahun (unit):</label>
+    <input type="text" id="sales" value="2000,2200,2500,2700,3000">
 
-        <label>Prediksi permintaan untuk tahun:</label>
-        <input type="number" id="tahun_pred" value="2025">
+    <label>Prediksi permintaan untuk tahun:</label>
+    <input type="number" id="tahun_pred" value="2025">
 
-        <button onclick="hitungRegresi()">Hitung Prediksi</button>
-        <button onclick="exportToPDF()">Export Invoice ke PDF</button>
+    <button onclick="hitungRegresi()">Hitung Prediksi</button>
+    <button onclick="exportToPDF()">Export Invoice ke PDF</button>
 
-        <p id="hasilPrediksi"></p>
-        <p id="totalBiaya"></p>
+    <table id="tabelInvoice" style="display:none">
+        <thead>
+        <tr>
+            <th>Deskripsi</th>
+            <th>Nilai</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+            <td>Tahun Prediksi</td>
+            <td id="tahunPredTd"></td>
+        </tr>
+        <tr>
+            <td>Jumlah Permintaan</td>
+            <td id="jumlahPrediksiTd"></td>
+        </tr>
+        <tr>
+            <td>Harga per Unit (Rp)</td>
+            <td id="hargaTd"></td>
+        </tr>
+        <tr>
+            <td>Total Biaya (Rp)</td>
+            <td id="totalBiayaTd"></td>
+        </tr>
+        </tbody>
+    </table>
 
-        <canvas id="grafik"></canvas>
+    <canvas id="grafik"></canvas>
 
-        <div class="signature">
-            <p>Hormat Kami,</p>
-            <p><strong>M Ridho NF</strong><br>Direktur Utama</p>
-        </div>
-
-        <div class="footer">
-            Dicetak secara otomatis oleh sistem pada <span id="tanggalSekarang"></span>
-        </div>
+    <div class="signature">
+        <p>Hormat Kami,</p>
+        <p><strong>M Ridho NF</strong><br>Direktur Utama</p>
     </div>
 
-    <script>
-        document.getElementById("tanggalSekarang").innerText = new Date().toLocaleDateString("id-ID", {
-            year: 'numeric', month: 'long', day: 'numeric'
-        });
+    <div class="footer">
+        Dicetak secara otomatis oleh sistem pada <span id="tanggalSekarang"></span>
+    </div>
+</div>
+<script>
+    document.getElementById("tanggalSekarang").innerText = new Date().toLocaleDateString("id-ID", {
+        year: 'numeric', month: 'long', day: 'numeric'
+    });
 
-        let chartInstance;
-        function hitungRegresi() {
-            const harga = parseFloat(document.getElementById("harga").value);
-            const tahunInput = document.getElementById("years").value.split(',').map(Number);
-            const salesInput = document.getElementById("sales").value.split(',').map(Number);
-            const tahunPred = parseInt(document.getElementById("tahun_pred").value);
+    let chartInstance;
+    function hitungRegresi() {
+        const harga = parseFloat(document.getElementById("harga").value);
+        const tahunInput = document.getElementById("years").value.split(',').map(Number);
+        const salesInput = document.getElementById("sales").value.split(',').map(Number);
+        const tahunPred = parseInt(document.getElementById("tahun_pred").value);
 
-            if (tahunInput.length !== salesInput.length) {
-                alert("Jumlah tahun dan data penjualan harus sama.");
-                return;
-            }
+        if (tahunInput.length !== salesInput.length) {
+            alert("Jumlah tahun dan data penjualan harus sama.");
+            return;
+        }
 
-            const n = tahunInput.length;
-            const sumX = tahunInput.reduce((a, b) => a + b, 0);
-            const sumY = salesInput.reduce((a, b) => a + b, 0);
-            const sumXY = tahunInput.reduce((sum, xi, i) => sum + xi * salesInput[i], 0);
-            const sumX2 = tahunInput.reduce((sum, xi) => sum + xi * xi, 0);
+        const n = tahunInput.length;
+        const sumX = tahunInput.reduce((a, b) => a + b, 0);
+        const sumY = salesInput.reduce((a, b) => a + b, 0);
+        const sumXY = tahunInput.reduce((sum, xi, i) => sum + xi * salesInput[i], 0);
+        const sumX2 = tahunInput.reduce((sum, xi) => sum + xi * xi, 0);
 
-            const b = (n * sumXY - sumX * sumY) / (n * sumX2 - sumX * sumX);
-            const a = (sumY - b * sumX) / n;
+        const b = (n * sumXY - sumX * sumY) / (n * sumX2 - sumX * sumX);
+        const a = (sumY - b * sumX) / n;
 
-            const prediksi = a + b * tahunPred;
-            const biaya = harga * prediksi;
+        const prediksi = a + b * tahunPred;
+        const biaya = harga * prediksi;
 
-            document.getElementById("hasilPrediksi").innerText = `Prediksi permintaan untuk tahun ${tahunPred}: ${prediksi.toFixed(0)} unit`;
-            document.getElementById("totalBiaya").innerText = `Total Biaya Untuk Tahun ${tahunPred} : Rp. ${biaya.toFixed(0)}`;
+        document.getElementById("tahunPredTd").innerText = tahunPred;
+        document.getElementById("jumlahPrediksiTd").innerText = prediksi.toFixed(0);
+        document.getElementById("hargaTd").innerText = `Rp ${harga.toLocaleString()}`;
+        document.getElementById("totalBiayaTd").innerText = `Rp ${biaya.toFixed(0).toLocaleString()}`;
+        document.getElementById("tabelInvoice").style.display = 'table';
 
-            const ctx = document.getElementById('grafik').getContext('2d');
-            const labels = [...tahunInput, tahunPred];
-            const actualData = [...salesInput];
-            const regressionLine = tahunInput.concat(tahunPred).map(x => a + b * x);
+        const ctx = document.getElementById('grafik').getContext('2d');
+        const labels = [...tahunInput, tahunPred];
+        const actualData = [...salesInput];
+        const regressionLine = tahunInput.concat(tahunPred).map(x => a + b * x);
 
-            if (chartInstance) chartInstance.destroy();
+        if (chartInstance) chartInstance.destroy();
 
-            chartInstance = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: labels,
-                    datasets: [
-                        {
-                            label: 'Data Aktual',
-                            data: actualData,
-                            borderColor: 'blue',
-                            backgroundColor: 'blue',
-                            fill: false
-                        },
-                        {
-                            label: 'Regresi Linear',
-                            data: regressionLine,
-                            borderColor: 'red',
-                            borderDash: [5, 5],
-                            fill: false
-                        }
-                    ]
+        chartInstance = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [
+                    {
+                        label: 'Data Aktual',
+                        data: actualData,
+                        borderColor: 'blue',
+                        backgroundColor: 'blue',
+                        fill: false
+                    },
+                    {
+                        label: 'Regresi Linear',
+                        data: regressionLine,
+                        borderColor: 'red',
+                        borderDash: [5, 5],
+                        fill: false
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                    },
+                    title: {
+                        display: true,
+                        text: 'Grafik Prediksi Permintaan Motor'
+                    }
                 },
-                options: {
-                    responsive: true,
-                    plugins: {
-                        legend: {
-                            position: 'top',
-                        },
+                scales: {
+                    x: {
                         title: {
                             display: true,
-                            text: 'Grafik Prediksi Permintaan Motor'
+                            text: 'Tahun'
                         }
                     },
-                    scales: {
-                        x: {
-                            title: {
-                                display: true,
-                                text: 'Tahun'
-                            }
-                        },
-                        y: {
-                            title: {
-                                display: true,
-                                text: 'Jumlah Terjual (unit)'
-                            }
+                    y: {
+                        title: {
+                            display: true,
+                            text: 'Jumlah Terjual (unit)'
                         }
                     }
                 }
-            });
-        }
+            }
+        });
+    }
 
-        function exportToPDF() {
-            const container = document.getElementById("report");
-            html2canvas(container).then(canvas => {
-                const imgData = canvas.toDataURL("image/png");
-                const { jsPDF } = window.jspdf;
-                const pdf = new jsPDF("p", "mm", "a4");
-                const width = pdf.internal.pageSize.getWidth();
-                const height = (canvas.height * width) / canvas.width;
-                pdf.addImage(imgData, "PNG", 0, 0, width, height);
-                pdf.save("invoice_prediksi_motor.pdf");
-            });
-        }
-    </script>
+    function exportToPDF() {
+        const container = document.getElementById("report");
+        html2canvas(container).then(canvas => {
+            const imgData = canvas.toDataURL("image/png");
+            const { jsPDF } = window.jspdf;
+            const pdf = new jsPDF("p", "mm", "a4");
+            const width = pdf.internal.pageSize.getWidth();
+            const height = (canvas.height * width) / canvas.width;
+            pdf.addImage(imgData, "PNG", 0, 0, width, height);
+            pdf.save("invoice_prediksi_motor.pdf");
+        });
+    }
+</script>
 </body>
 </html>
