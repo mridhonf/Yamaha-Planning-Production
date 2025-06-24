@@ -85,7 +85,7 @@
   <button onclick="exportPdf()">Export PDF</button>
 
   <script>
-  window.onload = function () {
+  function tampilkanHasil() {
     const harga = parseFloat(localStorage.getItem("harga"));
     const years = localStorage.getItem("years").split(',').map(Number);
     const sales = localStorage.getItem("sales").split(',').map(Number);
@@ -121,7 +121,7 @@
         ]
       }
     });
-  };
+  }
 
   function exportPdf() {
     html2canvas(document.body).then(canvas => {
@@ -134,6 +134,8 @@
       pdf.save('hasil_prediksi_motor.pdf');
     });
   }
+
+  window.onload = tampilkanHasil;
   </script>
 </body>
 </html>
